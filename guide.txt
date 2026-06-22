@@ -1,0 +1,217 @@
+Spring Guide for the Restaurant Project
+
+This guide explains each topic you listed and shows how to use it in your current Spring Boot restaurant project.
+
+1. Why Spring Framework?
+- Spring simplifies Java application development with dependency injection, modular architecture, and auto-configuration.
+- Traditional Java applications often need manual wiring, explicit XML config, and lots of boilerplate.
+- Spring lets you focus on business logic instead of object creation.
+
+2. Problems with Traditional Java Applications
+- Lots of `new` keyword usage and manual object construction.
+- Poor separation of concerns between controller, service, and persistence.
+- Harder to test because dependencies are not injected.
+- Manual configuration of database connections, servlet setup, and transaction management.
+
+3. What is Spring?
+- Spring is a framework for building Java applications with reusable components and inversion of control.
+- It provides modules for MVC, data access, security, validation, AOP, transaction management, and more.
+- In this project, Spring Boot brings a pre-configured Spring environment, reducing startup and config work.
+
+4. IoC (Inversion of Control)
+- IoC means the framework creates and manages objects instead of your code doing it directly.
+- In this app, classes like `MenuItemService`, `OrderService`, and `RestaurantController` are managed by Spring.
+- Use `@Service`, `@Repository`, `@RestController`, and `@Component` to mark beans.
+- Constructor injection is the recommended style. Example:
+  `public MenuItemService(MenuItemRepository menuItemRepository, RestaurantRepository restaurantRepository) { ... }`
+
+5. Dependency Injection
+- DI is a pattern where dependencies are supplied by Spring at runtime.
+- Your controllers receive services through constructor parameters.
+- Your services receive repositories through constructor parameters.
+- This makes the code easier to test and more modular.
+
+6. Spring Architecture
+- Current app layers:
+  - Controller layer: `src/main/java/.../controller`
+  - Service layer: `src/main/java/.../service`
+  - Repository layer: `src/main/java/.../repository`
+  - Entity/DTO layer: `src/main/java/.../entity` and `dto`
+- Spring Boot starts from `RestaurantApplication.java` and scans components in the package.
+- Auto configuration sets up web server, JPA, validation, and data source based on your dependencies and properties.
+
+7. Maven & Gradle
+- This project uses Maven via `pom.xml`.
+- Maven dependency management and plugins are already configured.
+- If you want Gradle later, you can convert the build and keep the same Spring Boot dependencies.
+
+8. Spring Boot Introduction
+- Spring Boot is a convention-over-configuration wrapper around Spring.
+- It uses starter dependencies and auto-configuration so you do not need XML configuration.
+- Run the app with `./mvnw.cmd spring-boot:run` or `mvn spring-boot:run`.
+
+9. Spring Boot Architecture
+- The main class `RestaurantApplication.java` loads the Spring context.
+- `spring-boot-starter-parent` provides default versions and plugin support.
+- `spring-boot-maven-plugin` builds the runnable application.
+
+10. Starter Dependencies
+- Current `pom.xml` includes:
+  - `spring-boot-starter-data-jpa`
+  - `spring-boot-starter-validation`
+  - `spring-boot-starter-webmvc`
+- These starters bring Spring MVC, JPA, Hibernate, validation, and web support.
+
+11. Auto Configuration
+- Spring Boot automatically configures components when starter dependencies are present.
+- Example: `spring-boot-starter-webmvc` configures the embedded servlet container and request handling.
+- Example: `spring-boot-starter-data-jpa` configures `EntityManagerFactory` and `DataSource`.
+
+12. Application Properties/YAML
+- Your current file is `src/main/resources/application.properties`.
+- It contains database connection, Hibernate settings, and server port.
+- You can also use `application.yml` with the same values in YAML format.
+- Example of YAML section:
+  `spring:
+    datasource:
+      url: jdbc:mysql://...`
+
+13. Beans & Bean Lifecycle
+- A Spring bean is an object managed by Spring.
+- Beans are created when the application starts.
+- If you want lifecycle callbacks, use `@PostConstruct`, `@PreDestroy`, or JPA callbacks like `@PrePersist`.
+- Example: calculating `Order.amt` with `@PrePersist` and `@PreUpdate` inside `Order` entity.
+
+14. REST API Development
+- Your controllers expose REST endpoints with `@RestController`.
+- Use `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, and `@DeleteMapping`.
+- Use `ResponseEntity` to return status codes and payloads.
+- Use DTOs for request and response models instead of exposing entities directly.
+
+15. Layered Architecture
+- Keep controller logic small.
+- Put business logic in services.
+- Put persistence logic in repositories.
+- This project is already layered.
+- Keep DTO conversion inside services or dedicated mapper classes.
+
+16. Exception Handling
+- Right now the app throws `RuntimeException` directly.
+- Improve it by creating custom exceptions like `ResourceNotFoundException`.
+- Add a `@ControllerAdvice` class to handle exceptions and return structured error responses.
+- Example:
+  - `@ExceptionHandler(ResourceNotFoundException.class)` returns `404`
+  - `@ExceptionHandler(MethodArgumentNotValidException.class)` returns validation errors.
+
+17. Validation
+- You already use `@Valid` in controller methods.
+- Add validation annotations to DTO fields, for example:
+  - `@NotBlank`, `@Email`, `@NotNull`, `@Positive`
+- Spring Boot will reject invalid input automatically and you can handle validation errors in `@ControllerAdvice`.
+
+18. Logging
+- Add logging to controllers and services using SLF4J.
+- Use Lombok `@Slf4j` or `LoggerFactory.getLogger(...)`.
+- Example:
+  `log.info("Creating menu item for restaurant {}", requestDto.getRestaurantId());`
+- Logging helps you debug request flow and exceptions.
+
+19. Spring Data JPA
+- Repositories extend `JpaRepository`.
+- This gives you CRUD operations and paging support without writing SQL.
+- Your current repositories are good examples.
+
+20. Derived Query Methods
+- You can add query methods automatically by naming them.
+- Example in `MenuItemRepository`:
+  `List<MenuItem> findByRestaurantId(Long restaurantId);`
+- Example in `UserRepository`:
+  `Optional<User> findByEmail(String email);`
+
+21. Custom JPQL Queries
+- Use `@Query("SELECT m FROM MenuItem m WHERE m.price > :price")`.
+- Put these methods in a repository interface.
+- Example:
+  `@Query("SELECT u FROM User u WHERE u.email = :email") Optional<User> findByEmail(@Param("email") String email);`
+
+22. Native SQL Queries
+- Use `@Query(value = "SELECT * FROM menu_item WHERE price > ?1", nativeQuery = true)`.
+- Use native queries only when JPQL cannot express your requirement.
+
+23. Pagination & Sorting
+- You already use `PageRequest.of(pageNo, size)` in `MenuItemService`.
+- Add sorting with `PageRequest.of(pageNo, size, Sort.by("price").descending())`.
+- Use `Page<T>` to return paging metadata.
+
+24. Hibernate
+- Hibernate is the JPA provider in your project.
+- It maps entities to database tables and manages object persistence.
+- Your entity classes use `@Entity`, `@Id`, `@GeneratedValue`, `@ManyToOne`, `@OneToMany`, and `@OneToOne`.
+
+25. Entity Lifecycle
+- Entities can use lifecycle callbacks with JPA annotations.
+- Example: compute total order amount before save with `@PrePersist` and `@PreUpdate`.
+- Example: set `orderDate` automatically when a new order is created.
+
+26. Relationships Mapping
+- Your current relationships are:
+  - `Restaurant` has many `MenuItem` and many `Order`
+  - `MenuItem` belongs to one `Restaurant` and has many `OrderItem`
+  - `User` has one `UserProfile` and many `Order`
+  - `Order` belongs to one `User`, one `Restaurant`, and has many `OrderItem`
+- This is correct for a restaurant-order model.
+
+27. Transaction Management
+- Add `@Transactional` to service methods that change data.
+- Example:
+  `@Transactional public OrderResponseDto saveOrder(...) { ... }`
+- This ensures rollback if any part of the save fails.
+
+28. Spring Security
+- Your current project does not include Spring Security.
+- To add it, include:
+  `spring-boot-starter-security`
+- Create a security configuration class and define authentication rules.
+- Protect endpoints and add login/signup flow.
+
+29. JWT Authentication
+- Add JWT support for stateless API authentication.
+- Steps:
+  - Add dependencies: `spring-boot-starter-security`, `jjwt` or `spring-security-oauth2-jose`.
+  - Create `JwtTokenProvider` for token creation and validation.
+  - Create a filter that reads the token from `Authorization: Bearer ...`.
+  - Secure endpoints so only authenticated users can place orders or update resources.
+
+30. File Upload
+- Add a controller endpoint that accepts `MultipartFile`.
+- Example:
+  `@PostMapping("/upload") public ResponseEntity<String> uploadFile(@RequestParam MultipartFile file)`
+- Save the file to local storage or store metadata in the database.
+- Add `spring.servlet.multipart.max-file-size` configuration if needed.
+
+31. Testing
+- Use Spring Boot test starters and `MockMvc`.
+- Example tests:
+  - `@WebMvcTest(MenuItemController.class)` for controller tests.
+  - `@DataJpaTest` for repository tests.
+  - `@SpringBootTest` for full integration tests.
+- Write tests for happy path and validation errors.
+
+How to use this guide:
+- Open the project in your editor.
+- For each topic, inspect the related code in the project.
+- Add missing features one by one, starting with exception handling and validation.
+- Then improve persistence with custom queries and transactions.
+- Finally add security, JWT, file upload, and tests.
+
+Start with these tasks in your current project:
+1. Add validation annotations to DTO fields.
+2. Create custom exceptions and a `@ControllerAdvice` handler.
+3. Add logging to service and controller classes.
+4. Add `@Transactional` to order and menu service methods.
+5. Add a custom query method to `UserRepository` and `MenuItemRepository`.
+6. Add a security config and login flow if you want to practice Spring Security.
+7. Add a simple file upload endpoint.
+8. Write at least one controller test and one repository test.
+
+This guide is meant to help you implement the concepts in the restaurant project while learning Spring Boot step by step.

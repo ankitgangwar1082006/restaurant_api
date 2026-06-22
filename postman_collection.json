@@ -1,0 +1,54 @@
+{
+  "info": {
+    "name": "Restaurant API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Restaurant",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"My Diner\",\"location\":\"Mumbai\",\"status\":true}"
+        },
+        "url": { "raw": "http://localhost:8080/api/restaurants", "host": ["http://localhost:8080"], "path": ["api","restaurants"] }
+      }
+    },
+    {
+      "name": "Get Restaurant",
+      "request": { "method": "GET", "url": { "raw": "http://localhost:8080/api/restaurants/1", "host": ["http://localhost:8080"], "path": ["api","restaurants","1"] } }
+    },
+    {
+      "name": "Create Menu Item",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"name\":\"Paneer Butter Masala\",\"restaurantId\":1,\"price\":250.0}" },
+        "url": { "raw": "http://localhost:8080/api/menu_items", "host": ["http://localhost:8080"], "path": ["api","menu_items"] }
+      }
+    },
+    {
+      "name": "Get Menu Item",
+      "request": { "method": "GET", "url": { "raw": "http://localhost:8080/api/menu_items/1", "host": ["http://localhost:8080"], "path": ["api","menu_items","1"] } }
+    },
+    {
+      "name": "Menu Page",
+      "request": { "method": "GET", "url": { "raw": "http://localhost:8080/api/menu_items/page?page=0&size=10", "host": ["http://localhost:8080"], "path": ["api","menu_items","page"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] } }
+    },
+    {
+      "name": "Create User",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"name\":\"Aman\",\"email\":\"aman@example.com\",\"password\":\"secret1\",\"phoneNumber\":\"9876543210\",\"address\":\"Mumbai\"}" },
+        "url": { "raw": "http://localhost:8080/api/users", "host": ["http://localhost:8080"], "path": ["api","users"] }
+      }
+    },
+    {
+      "name": "Get User",
+      "request": { "method": "GET", "url": { "raw": "http://localhost:8080/api/users/1", "host": ["http://localhost:8080"], "path": ["api","users","1"] } }
+    }
+  ]
+}
